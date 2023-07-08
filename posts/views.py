@@ -4,11 +4,13 @@ from rest_framework.views import APIView
 from .models import Post
 from .serializers import PostSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from DRF_prj.permissions import IsOwnerOrReadOnly
+from django.http import Http404
 
 class PostList(APIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
+
     def get(self, request):
         posts = Post.objects.all()
         serializer = PostSerializer(
@@ -27,3 +29,40 @@ class PostList(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class PostDetail(APIView):
+    # Attribute of APIView that creates a form for the object
+    serializer_class = PostSerializer
+    # Attribute of APIView that allows to manage permissions
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def get_object(self, pk):
+    # retrieve the object from the database
+        try:
+            post = Post.objects.get(pk=pk)
+             # Call an method of APIView to check the permissions
+            # If the user does not have permission, the method will
+            # thrwo the 403 Error (Forbidden)
+            self.check_object_permissions(self.request, post)
+            return post
+        except Post.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post, context={"request": request})
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post, data=request.data, context={"request": request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        post = self.get_object(pk)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
