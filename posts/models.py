@@ -31,3 +31,6 @@ class Post(models.Model):
 
         def __str__(self) -> str:
             return f"{self.id} {self.title}"
+
+    def __str__(self) -> str:
+        return self.title
