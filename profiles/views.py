@@ -3,6 +3,7 @@ from rest_framework import status
 from django.http import Http404
 # from rest_framework.views import APIView
 from rest_framework import generics, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from .models import Profile
 from .serializers import ProfileSerializer
@@ -25,9 +26,10 @@ class ProfileList(generics.ListAPIView):
     serializer_class = ProfileSerializer  
 
     filter_backends = [
-        filters.OrderingFilter
+        filters.OrderingFilter,
+        DjangoFilterBackend
     ]
-
+    # fields for OrderingFilter
     ordering_fields = [
         'posts_count',
         'followers_count',
@@ -35,7 +37,10 @@ class ProfileList(generics.ListAPIView):
         'owner__following__created_at',
         'owner__followed__created_at',
     ]
-
+    # fields for DjangoFilterBackend
+    filterset_fields = [
+        'owner__following__followed__profile', # owner of the profile follows someone and they are following them back
+    ]
 
 
 class ProfileDetails(generics.RetrieveDestroyAPIView):
