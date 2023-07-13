@@ -36,17 +36,23 @@ CLOUDINARY_STORAGE = {
 print(f"Cloudinary : {os.environ['CLOUDINARY_URL']}")
 MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-# REST FRAMEWORK AUTHENTICATION
-# if DEV(eloper-mode) is set, then use session authenticaton
-# else use JWT-Tokens
+# REST FRAMEWORK 
 REST_FRAMEWORK = {
+    # if DEV(eloper-mode) is set, then use session authenticaton
+    # else use JWT-Tokens
     'DEFAULT_AUTHENTICATION_CLASSES': [(
         'rest_framework.authentication.SessionAuthentication'
         if 'DEV' in os.environ
         else 'dj_rest_auth.jwt_auth.JWTCookieAuthentication'
-    )]
+    )], # PAGINATION SETTINGS   
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 3,
+    'DATETIME_FORMAT': '%d %b %Y',
 }
 
+# Set JSON-Format outside the Developer environment (Turn off the HTML and JavaScript in the views)
+if 'DEV' not in os.environ:
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = ['rest_framework.renderers.JSONRenderer',]
 # enable JWT-Token-based authentication
 REST_USE_JWT = True
 # use JWT-Tokesn over HTTPS-connection only
