@@ -36,7 +36,29 @@ CLOUDINARY_STORAGE = {
 print(f"Cloudinary : {os.environ['CLOUDINARY_URL']}")
 MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# REST FRAMEWORK AUTHENTICATION
+# if DEV(eloper-mode) is set, then use session authenticaton
+# else use JWT-Tokens
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [(
+        'rest_framework.authentication.SessionAuthentication'
+        if 'DEV' in os.environ
+        else 'dj_rest_auth.jwt_auth.JWTCookieAuthentication'
+    )]
+}
 
+# enable JWT-Token-based authentication
+REST_USE_JWT = True
+# use JWT-Tokesn over HTTPS-connection only
+JWT_AUTH_SECURE = True
+# Cookie-name for access token
+JWT_AUTH_COOKIE = 'my-app-auth'
+# Cookie-name for refresh token
+JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
+# Override default User details serializer for JWT-Tokens
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'DRF_prj.serializers.CurrentUserSerializer'
+}
 # Application definition
 
 INSTALLED_APPS = [
@@ -50,6 +72,13 @@ INSTALLED_APPS = [
     'cloudinary',
     'rest_framework',
     'django_filters',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
     'profiles',
     'posts',
     'comments',
@@ -57,7 +86,7 @@ INSTALLED_APPS = [
     'followers',
 ]
 
-
+SITE_ID = 1 # required for dj_rest_auth
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
