@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
-from .env import ENVIRONMENT
+if os.path.exists('env.py'):
+    from .env import ENVIRONMENT
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEV' in os.environ
 
-ALLOWED_HOSTS = ['localhost', 'de-drf-api.herokuapp.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'de-drf-api.herokuapp.com']
 
 # CLOUDINARY
 CLOUDINARY_STORAGE = {
