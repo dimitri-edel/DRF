@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
-if os.path.exists('env.py'):
+if os.path.exists('DRF_prj/env.py'):
     from .env import ENVIRONMENT
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,7 +28,8 @@ SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEV' in os.environ
 
-ALLOWED_HOSTS = ['127.0.0.1', 'de-drf-api.herokuapp.com']
+# https://de-drf-api-a625517dd1a1.herokuapp.com/
+ALLOWED_HOSTS = ['127.0.0.1', 'de-drf-api-a625517dd1a1.herokuapp.com']
 
 # CLOUDINARY
 CLOUDINARY_STORAGE = {
