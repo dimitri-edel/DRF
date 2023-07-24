@@ -22,21 +22,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=p42zz805c#o7%7!wpeb&ov(x^q8nh1u*4!)-emws%2gm_(ii_'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = 'DEV' in os.environ
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', 'de-drf-api.herokuapp.com']
 
-# CLOUDINARY 
+# CLOUDINARY
 CLOUDINARY_STORAGE = {
-    'CLOUDINARY_URL': ENVIRONMENT['CLOUDINARY_URL']
+    'CLOUDINARY_URL': os.environ['CLOUDINARY_URL']
 }
 print(f"Cloudinary : {os.environ['CLOUDINARY_URL']}")
 MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-# REST FRAMEWORK 
+# REST FRAMEWORK
 REST_FRAMEWORK = {
     # if DEV(eloper-mode) is set, then use session authenticaton
     # else use JWT-Tokens
@@ -44,7 +44,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication'
         if 'DEV' in os.environ
         else 'dj_rest_auth.jwt_auth.JWTCookieAuthentication'
-    )], # PAGINATION SETTINGS   
+    )],  # PAGINATION SETTINGS
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 3,
     'DATETIME_FORMAT': '%d %b %Y',
@@ -52,7 +52,8 @@ REST_FRAMEWORK = {
 
 # Set JSON-Format outside the Developer environment (Turn off the HTML and JavaScript in the views)
 if 'DEV' not in os.environ:
-    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = ['rest_framework.renderers.JSONRenderer',]
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
+        'rest_framework.renderers.JSONRenderer',]
 # enable JWT-Token-based authentication
 REST_USE_JWT = True
 # use JWT-Tokesn over HTTPS-connection only
@@ -61,6 +62,9 @@ JWT_AUTH_SECURE = True
 JWT_AUTH_COOKIE = 'my-app-auth'
 # Cookie-name for refresh token
 JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
+# To be able to have the front end app and the API deployed to different platforms, 
+# set the JWT_AUTH_SAMESITE attribute to 'None'. Without this the cookies would be blocked
+JWT_AUTH_SAMESITE = 'None'
 # Override default User details serializer for JWT-Tokens
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'DRF_prj.serializers.CurrentUserSerializer'
@@ -85,6 +89,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'dj_rest_auth.registration',
+    'corsheaders',
     'profiles',
     'posts',
     'comments',
@@ -92,9 +97,10 @@ INSTALLED_APPS = [
     'followers',
 ]
 
-SITE_ID = 1 # required for dj_rest_auth
+SITE_ID = 1  # required for dj_rest_auth
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -103,6 +109,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Allow Request from ...
+if 'CLIENT_ORIGIN' in os.environ:
+     CORS_ALLOWED_ORIGINS = [
+         os.environ.get('CLIENT_ORIGIN')
+     ]
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'DRF_prj.urls'
 
@@ -130,8 +143,17 @@ WSGI_APPLICATION = 'DRF_prj.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+
+        'NAME': os.environ['DB_NAME'],
+
+        'USER': os.environ['DB_USER'],
+
+        'PASSWORD': os.environ['DB_PASSWORD'],
+
+        'HOST': os.environ['DB_HOST'],
+
+        'PORT': os.environ['DB_PORT'],
     }
 }
 
